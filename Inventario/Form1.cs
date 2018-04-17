@@ -7,8 +7,6 @@ namespace Inventario
     {
         public class Producto
         {
-            private static int ids = -1;
-
             private int codigo;
             private string nombre;
             private double costo;
@@ -20,10 +18,9 @@ namespace Inventario
             public string Descripcion { get; set; }
             public int Cantidad { get; set; }
 
-            public Producto(string name, double cost, string description, int amount)
+            public Producto(int codigo, string name, double cost, string description, int amount)
             {
-                ids++;
-                this.codigo = ids;
+                this.codigo = codigo;
                 this.nombre = name;
                 this.costo = cost;
                 this.Descripcion = description;
@@ -49,18 +46,14 @@ namespace Inventario
             public Inventario(int numeroProductos)
             {
                 productos = new Producto[numeroProductos];
-                for (int i = 0; i < Length; i++)
-                {
-                    productos[i] = null;
-                }
                 lastElement = 0;
             }
 
-            public string agregar(string name, double cost, string description, int amount)
+            public string agregar(Producto producto)
             {
                 if (lastElement < Length)
                 {
-                    productos[lastElement] = new Producto(name, cost, description, amount);
+                    productos[lastElement] = producto;
                     lastElement++;
                     return "Se agregó exitosamente el producto";
                 }
@@ -74,8 +67,11 @@ namespace Inventario
             {
                 for(int i = 0; i < lastElement; i++)
                 {
-                    if (productos[i].Codigo == codigo)
-                        return productos[i];
+                    if(productos[i] != null)
+                    {
+                        if (productos[i].Codigo == codigo)
+                            return productos[i];
+                    }
                 }
 
                 return null;
@@ -94,11 +90,14 @@ namespace Inventario
                 else
                 {
                     for (int i = pos; i < lastElement - 1; i++)
-                        productos[i] = new Producto(productos[i + 1].Nombre, productos[i + 1].Costo, productos[i + 1].Descripcion, productos[i + 1].Cantidad);
+                        productos[i] = productos[i + 1];
 
-                    productos[lastElement - 1] = null;
+                    if(lastElement - 1 > 0)
+                    {
+                        productos[lastElement - 1] = null;
+                        lastElement--;
+                    }
 
-                    lastElement--;
                     return "Se eliminó correctamente el producto";
                 }
             }
@@ -115,12 +114,12 @@ namespace Inventario
                 }
                 else
                 {
-                    Producto temporal = new Producto(productos[lastElement - 1].Nombre, productos[lastElement - 1].Costo, productos[lastElement - 1].Descripcion, productos[lastElement - 1].Cantidad);
+                    Producto temporal = productos[lastElement - 1];
 
                     for (int i = posicion; i < lastElement; i++)
                     {
-                        Producto temp = new Producto(productos[i].Nombre, productos[i].Costo, productos[i].Descripcion, productos[i].Cantidad);
-                        productos[i] = new Producto(producto.Nombre, producto.Costo, producto.Descripcion, producto.Cantidad);
+                        Producto temp = productos[i];
+                        productos[i] = producto;
                         producto = temp;
                     }
 
@@ -159,7 +158,7 @@ namespace Inventario
         {
             for(int i = 0; i < 10; i++)
             {
-                inventario.agregar("producto " + i, i, "description " + i + " " + i + " " + " "+ i, i);
+                inventario.agregar(new Producto(i, "producto " + i, i, "description " + i + " " + i + " " + " "+ i, i));
             }
         }
 
@@ -173,7 +172,7 @@ namespace Inventario
         {
             if(validar())
             {
-                string agregar = inventario.agregar(txtNombre.Text, Convert.ToDouble(txtCantidad.Text), txtDescripcion.Text, Convert.ToInt32(txtCantidad.Text));
+                string agregar = inventario.agregar(new Producto( Convert.ToInt32(txtCodigo.Text), txtNombre.Text, Convert.ToDouble(txtCantidad.Text), txtDescripcion.Text, Convert.ToInt32(txtCantidad.Text)));
                 lblEstado.Text = agregar;
             }
         }
@@ -208,7 +207,7 @@ namespace Inventario
             if(validar())
             {
                 int posicion = Convert.ToInt32(numPosicion.Value);
-                string insertar = inventario.insertar(posicion, new Producto(txtNombre.Text, Convert.ToDouble(txtCantidad.Text), txtDescripcion.Text, Convert.ToInt32(txtCantidad.Text)));
+                string insertar = inventario.insertar(posicion, new Producto(Convert.ToInt32(txtCodigo.Text), txtNombre.Text, Convert.ToDouble(txtCantidad.Text), txtDescripcion.Text, Convert.ToInt32(txtCantidad.Text)));
                 lblEstado.Text = insertar;
             }
         }
